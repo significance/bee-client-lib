@@ -28,46 +28,153 @@ const userObject = {
     status: "accountCreated"
 }
 
+const userObject2 = {
+    avatar: "elpha",
+    username: "Big Boys Club Berlin",
+    status: "accountUpdate"
+}
+
+const userObject3 = {
+    avatar: "flpha",
+    username: "Big Bad Boys Club Berlin",
+    status: "accountUpdate"
+}
+
 const rawSalt = te.encode("userdata");
 const uint8 = new Uint8Array(32);
 uint8.set(rawSalt, 0)
 const salt = uint8
 
-const data = te.encode(JSON.stringify(userObject))
+const rawSalt2 = te.encode("userdata");
+const uint82 = new Uint8Array(32);
+uint82.set(rawSalt, 0)
+const salt2 = uint82
 
-const bee = new BeeClient("http://localhost:8080/chunks", { timeout: 1000 })
+const data = te.encode(JSON.stringify(userObject))
+const data2 = te.encode(JSON.stringify(userObject2))
+const data3 = te.encode(JSON.stringify(userObject3))
+
+const bee = new BeeClient("http://localhost:8080", { timeout: 1000 })
 
 describe('BeeClient', () => {
     describe('Testing the Lib <3', () => {
-        it('stores item', async () => {
+        step('stores item', async (done) => {
             fileData = await readFileAsync('test/helloworld.txt')
             const hash = await bee.uploadData(fileData).then(hash => {
                 tempHash = toHex(hash)
             })
+            done()
+            //no assertion?
         })
-        it('retrieves item', async () => {
+        step('retrieves item', async (done) => {
             const newHash = tempHash.startsWith('0x') ? tempHash.slice(2) : tempHash
             const res = await bee.downloadData(newHash)
             const result = Buffer.from(res)
             assert.equal(result.toString(), fileData.toString(), "Stored is not the same as retrieved")
+            done()
         })
-        it('creates a feed', async () => {
+        step('creates a feed', async (done) => {
             const res = await bee.addFeed(wallet)
             const res2 = await bee.updateFeed(data, wallet)
+            done()
         })
-        it('reads a feed', async () => {
+        step('reads a feed', async (done) => {
             const res = await bee.getFeed(wallet)
             const string = td.decode(res.chunk.data)
             assert.equal(string, JSON.stringify(userObject), 'userObject is not found')
+            done()
         })
-        it('creates a feed w salt', async () => {
+        step('updates a feed', async (done) => {
+            const res = await bee.updateFeed(data2, wallet)
+            const res2 = await bee.getFeed(wallet)
+            const string = td.decode(res2.chunk.data)
+            assert.equal(string, JSON.stringify(userObject2), 'userObject2 is not found')
+            done()
+        })
+        step('reads a feed entry at specific index', async () => {
+            const res = await bee.getFeedAtIndex(wallet, 0)
+            const string = td.decode(res.chunk.data)
+            assert.equal(string, JSON.stringify(userObject), 'userObject is not found')
+
+            const res2 = await bee.getFeedAtIndex(wallet, 1)
+            const string2 = td.decode(res2.chunk.data)
+            assert.equal(string2, JSON.stringify(userObject2), 'userObject2 is not found')
+        })
+        step('updates a feed at specific index', async (done) => {
+            const res = await bee.updateFeedAtIndex(data3, wallet, 99)
+            const res2 = await bee.getFeedAtIndex(wallet, 99)
+            const string = td.decode(res2.chunk.data)
+            assert.equal(string, JSON.stringify(userObject3), 'userObject3 is not found')
+            done()
+        })
+        step('creates a feed w salt', async (done) => {
             const res = await bee.addFeedWithSalt(salt, wallet)
             const res2 = await bee.updateFeedWithSalt(salt, data, wallet)
+            done()
         })
-        it('reads a feed w salt', async () => {
+        step('reads a feed w salt', async (done) => {
             const res = await bee.getFeedWithSalt(salt, wallet)
             var string = td.decode(res.chunk.data);
             assert.equal(string, JSON.stringify(userObject), 'userObject is not found')
+            done()
+        })
+        step('updates a feed w salt', async (done) => {
+            const res = await bee.updateFeedWithSalt(salt, data2, wallet)
+            const res2 = await bee.getFeedWithSalt(salt, wallet)
+            var string = td.decode(res2.chunk.data);
+            assert.equal(string, JSON.stringify(userObject2), 'userObject2 is not found')
+            done()
+        })
+        step('reads a feed w salt at specific index', async (done) => {
+            const res = await bee.getFeedWithSaltAtIndex(salt, wallet, 0)
+            const string = td.decode(res.chunk.data)
+            assert.equal(string, JSON.stringify(userObject), 'userObject is not found')
+
+            const res2 = await bee.getFeedWithSaltAtIndex(salt, wallet, 1)
+            const string2 = td.decode(res2.chunk.data)
+            assert.equal(string2, JSON.stringify(userObject2), 'userObject2 is not found')
+            done()
+        })
+        step('updates a feed w salt at specific index', async (done) => {
+            const res = await bee.updateFeedWithSaltAtIndex(salt2, data, wallet, 999)
+            const res2 = await bee.getFeedWithSaltAtIndex(salt, wallet, 999)
+            var string = td.decode(res2.chunk.data);
+            assert.equal(string, JSON.stringify(userObject), 'userObject is not found')
+            done()
+        })
+        step('reads a feed w salt at highest available index', async (done) => {
+            const res = await bee.getFeedWithSaltAtHighestIndex(salt, wallet, 0)
+            const string = td.decode(res.chunk.data)
+            assert.equal(string, JSON.stringify(userObject2), 'userObject is not found')
+            done()
+        })
+        step('sets greatest index', async (done) => {
+            const res = await bee.set(wallet, 'testkey', 'testvalue')
+            done()
+        })
+        step('gets greatest index', async (done) => {
+            const res = await bee.get(wallet, 'testkey')
+            assert.equal(res, 'testvalue', 'value is not found')
+            done()
+        })
+        step('sets new greatest index + 1', async (done) => {
+            const res = await bee.set(wallet, 'testkey', 'testvalue2')
+            done()
+        })
+        step('gets new greatest index +1', async (done) => {
+            const res = await bee.get(wallet, 'testkey')
+            assert.equal(res, 'testvalue2', 'value is not found')
+            done()
+        })
+        step('sets new greatest index +2', async (done) => {
+            const res = await bee.set(wallet, 'testkey', 'testvalue3')
+            done()
+        })
+        step('gets new greatest index +2', async (done) => {
+            debugger
+            const res = await bee.get(wallet, 'testkey')
+            assert.equal(res, 'testvalue3', 'value is not found')
+            done()
         })
     })
 })
