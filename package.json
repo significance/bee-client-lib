@@ -4,7 +4,7 @@
   "description": "js lib to interact with Swarm Bee",
   "main": "index.js",
   "scripts": {
-    "test": "mocha test --timeout 15000"
+    "test": "mocha test --timeout 15000 --require mocha-steps"
   },
   "author": "Michelle Plur",
   "license": "MIT",
