@@ -7,6 +7,12 @@ const { toHex } = require('./conversion')
 
 const textEncoding = require('text-encoding')
 
+function toHexString(byteArray) {
+  return Array.prototype.map.call(byteArray, function(byte) {
+    return ('0' + (byte & 0xFF).toString(16)).slice(-2);
+  }).join('');
+}
+
 const td = new textEncoding.TextDecoder("utf-8")
 const te = new textEncoding.TextEncoder("utf-8")
 
@@ -162,7 +168,7 @@ describe('BeeClient', () => {
             done()
         })
         step('gets new greatest index +1', async (done) => {
-            const res = await bee.get(wallet, 'testkey')
+            const res = await bee.getByAddress(toHexString(wallet.address), 'testkey')
             assert.equal(res, 'testvalue2', 'value is not found')
             done()
         })
@@ -171,7 +177,6 @@ describe('BeeClient', () => {
             done()
         })
         step('gets new greatest index +2', async (done) => {
-            debugger
             const res = await bee.get(wallet, 'testkey')
             assert.equal(res, 'testvalue3', 'value is not found')
             done()

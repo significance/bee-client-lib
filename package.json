@@ -16,10 +16,10 @@
     "chai-spies": "^1.0.0",
     "mocha": "^8.0.1",
     "node-fetch": "^2.6.0",
-    "swarm-lowlevel": "git+https://gitlab.com/nolash/swarm-lowlevel-js#cab52be0f5a088d9bb07ab2926d48e7ed369434c",
     "text-encoding": "^0.7.0",
     "utf8-encoder": "^1.0.1",
-    "dfeeds": "git+https://gitlab.com/significance/dfeeds#00c3a97b0245504f7805176fb8e1dfdea655c894"
+    "swarm-lowlevel": "git+https://gitlab.com/significance/swarm-lowlevel-js#15ba7b14c268109a40fbad58bb05a8bd1bd968b5",
+    "dfeeds": "git+https://gitlab.com/significance/dfeeds#17ffe658fd24c3b9790596e8748a9edaf3d72f69"
   },
   "devDependencies": {
     "mocha-steps": "^1.3.0"

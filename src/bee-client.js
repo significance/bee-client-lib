@@ -5,6 +5,14 @@ const dfeeds = require('dfeeds')
 
 const textEncoding = require('text-encoding')
 
+function toByteArray(hexString) {
+  var result = [];
+  for (var i = 0; i < hexString.length; i += 2) {
+    result.push(parseInt(hexString.substr(i, 2), 16));
+  }
+  return result;
+}
+
 function toArrayBuffer(buf) {
     if (buf instanceof ArrayBuffer) {
         return buf;
@@ -112,6 +120,18 @@ BeeClient.prototype.getFeedAtIndex = async function (wallet, i) {
     return res
 }
 
+BeeClient.prototype.getFeedAtIndexByAddress = async function (address, i) {
+    const baddress = toByteArray(address);
+    const indexedSocIdGen = this.feeds[baddress]
+    const thisId = indexedSocIdGen.atIndex(i)
+    const soc = new swarm.soc(thisId, undefined, undefined, baddress)
+    const socAddress = soc.getAddress()
+    const rawRes = await this.downloadChunkData(toHex(socAddress))
+    const ch = { data: new Uint8Array(rawRes) }
+    const res = new swarm.socFromSocChunk(ch)
+    return res
+}
+
 BeeClient.prototype.addFeedWithSalt = async function (salt, wallet, startIndex = -1) {
 
     const indexedSaltedSocIdGen = new dfeeds.saltIndexed(wallet.address, salt)
@@ -182,14 +202,36 @@ BeeClient.prototype.getFeedWithSaltAtIndex = async function (salt, wallet, i) {
     return res
 }
 
-BeeClient.prototype.getFeedWithSaltAtHighestIndex = async function (salt, wallet, i = 0) {
+BeeClient.prototype.getFeedWithSaltAtIndexByAddress = async function (salt, address, i) {
+    const baddress = toByteArray(address);
+    if(this.feeds[salt] === undefined || this.feeds[salt][baddress] === undefined ){
+        return false;
+    }
+    const indexedSaltedSocIdGen = this.feeds[salt][baddress]
+    const thisId = indexedSaltedSocIdGen.atIndex(i)
+    const soc = new swarm.soc(thisId, undefined, undefined, undefined, baddress)
+    const socAddress = soc.getAddress()
+    const rawRes = await this.downloadChunkData(toHex(socAddress))
+    const ch = { data: new Uint8Array(rawRes) }
+    const res = new swarm.socFromSocChunk(ch)
+    return res
+}
+
+BeeClient.prototype.getFeedWithSaltAtHighestIndex = async function (salt, wallet, i = 0, address) {
     //start to get incremental from index i until 404 then report highest value
     let res = false
     let done = false
+    let baddress
     while(done === false){
         try{
-            res = await this.getFeedWithSaltAtIndex(salt, wallet, i)
-            console.log(i, salt, res)
+            if(typeof wallet !== 'undefined'){
+                res = await this.getFeedWithSaltAtIndex(salt, wallet, i)
+                baddress = wallet.address;
+            }
+            if(typeof address !== 'undefined'){
+                res = await this.getFeedWithSaltAtIndexByAddress(salt, address, i)
+                baddress = toByteArray(address);
+            }
             if(res === false){
                 return false
             }
@@ -205,7 +247,7 @@ BeeClient.prototype.getFeedWithSaltAtHighestIndex = async function (salt, wallet
                     // the incorrect error reported from bee
                     done = true;
                     //re-estabish dfeeds index
-                    const indexedSaltedSocIdGen = this.feeds[salt][wallet.address]
+                    const indexedSaltedSocIdGen = this.feeds[salt][baddress]
                     indexedSaltedSocIdGen.set(i)
                     break;
                 default:
@@ -214,6 +256,31 @@ BeeClient.prototype.getFeedWithSaltAtHighestIndex = async function (salt, wallet
         }
     }
     return res
+}
+
+BeeClient.prototype.getByAddress = async function (address, key, i = -1) {
+    //key should be < 32 bytes
+    const te = new textEncoding.TextEncoder("utf-8")
+    const rawSalt = te.encode(key)
+    const uint8 = new Uint8Array(32)
+    uint8.set(rawSalt, 0)
+    const salt = uint8
+
+    // if no index supplied, work out the highest index, if there is none, set to 0
+    // if(i === -1){
+    //     const indexedSaltedSocIdGen = this.feeds[salt][wallet.address]
+    //     i = indexedSaltedSocIdGen.current()
+    //     i = i === -1 ? 0 : i
+    // }
+
+    let res = await this.getFeedWithSaltAtHighestIndex(salt, undefined, 0, address)
+    if(res === false){
+        return false
+    }else{
+        const td = new textEncoding.TextDecoder("utf-8")
+        const string = td.decode(res.chunk.data)
+        return string
+    }
 }
 
 BeeClient.prototype.get = async function (wallet, key, i = -1) {
@@ -264,8 +331,6 @@ BeeClient.prototype.set = async function (wallet, key, value, i = -1) {
             // i = i + 1
         }
     }
-
-    console.log('setting', i)
 
     return this.updateFeedWithSaltAtIndex(salt, data, wallet, i)
 }
