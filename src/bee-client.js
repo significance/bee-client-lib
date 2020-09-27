@@ -189,7 +189,7 @@ BeeClient.prototype.getFeedWithSalt = async function (salt, wallet) {
 }
 
 BeeClient.prototype.getFeedWithSaltAtIndex = async function (salt, wallet, i) {
-    if(this.feeds[salt] === undefined){
+    if(this.feeds[salt] === undefined || this.feeds[salt][wallet.address] === undefined){
         return false;
     }
     const indexedSaltedSocIdGen = this.feeds[salt][wallet.address]
