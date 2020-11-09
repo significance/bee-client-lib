@@ -18,7 +18,7 @@
     "node-fetch": "^2.6.0",
     "text-encoding": "^0.7.0",
     "utf8-encoder": "^1.0.1",
-    "swarm-lowlevel": "git+https://gitlab.com/significance/swarm-lowlevel-js#15ba7b14c268109a40fbad58bb05a8bd1bd968b5",
+    "swarm-lowlevel": "git+https://gitlab.com/significance/swarm-lowlevel-js#e36c89858fb2f1578ffc33754fb1f554699f43db",
     "dfeeds": "git+https://gitlab.com/significance/dfeeds#17ffe658fd24c3b9790596e8748a9edaf3d72f69"
   },
   "devDependencies": {
