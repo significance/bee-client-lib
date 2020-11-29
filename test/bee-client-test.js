@@ -60,7 +60,7 @@ const data = te.encode(JSON.stringify(userObject))
 const data2 = te.encode(JSON.stringify(userObject2))
 const data3 = te.encode(JSON.stringify(userObject3))
 
-const bee = new BeeClient("http://localhost:8080", { timeout: 1000 })
+const bee = new BeeClient("http://localhost:1633", { timeout: 1000 })
 
 describe('BeeClient', () => {
     describe('Testing the Lib <3', () => {
@@ -163,7 +163,7 @@ describe('BeeClient', () => {
             assert.equal(res, 'testvalue', 'value is not found')
             done()
         })
-        step('sets new greatest index + 1', async (done) => {
+        step('sets new greatest index +1', async (done) => {
             const res = await bee.set(wallet, 'testkey', 'testvalue2')
             done()
         })
