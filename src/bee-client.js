@@ -237,7 +237,9 @@ BeeClient.prototype.getFeedWithSaltAtHighestIndex = async function (salt, wallet
             }
             i += 1
         }catch(e){
-            switch(e.response.status){
+            let status = e.message.indexOf('timeout') > -1 ? 0 : e.response.status;
+            switch(status){
+                case 0 :
                 case 404 :
                 case 500 :
                     // a chunk either
