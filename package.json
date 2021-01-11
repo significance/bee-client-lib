@@ -9,17 +9,17 @@
   "author": "Michelle Plur",
   "license": "MIT",
   "dependencies": {
-    "axios": "^0.19.2",
+    "axios": "^0.21.1",
     "base32-decode": "^1.0.0",
     "base32-encode": "^1.1.1",
     "chai": "^4.2.0",
     "chai-spies": "^1.0.0",
-    "mocha": "^8.0.1",
-    "node-fetch": "^2.6.0",
+    "dfeeds": "git+https://gitlab.com/significance/dfeeds#17ffe658fd24c3b9790596e8748a9edaf3d72f69",
+    "mocha": "^8.2.1",
+    "node-fetch": "^2.6.1",
+    "swarm-lowlevel": "git+https://gitlab.com/significance/swarm-lowlevel-js#b175180019a55ad779485c1388c2afe5c3a5bda0",
     "text-encoding": "^0.7.0",
-    "utf8-encoder": "^1.0.1",
-    "swarm-lowlevel": "git+https://gitlab.com/significance/swarm-lowlevel-js#e36c89858fb2f1578ffc33754fb1f554699f43db",
-    "dfeeds": "git+https://gitlab.com/significance/dfeeds#17ffe658fd24c3b9790596e8748a9edaf3d72f69"
+    "utf8-encoder": "^1.0.1"
   },
   "devDependencies": {
     "mocha-steps": "^1.3.0"
