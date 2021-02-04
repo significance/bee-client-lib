@@ -60,7 +60,7 @@ const data = te.encode(JSON.stringify(userObject))
 const data2 = te.encode(JSON.stringify(userObject2))
 const data3 = te.encode(JSON.stringify(userObject3))
 
-const bee = new BeeClient("http://localhost:1633", { timeout: 1000 })
+const bee = new BeeClient("https://bee-gateway.duckdns.org", { timeout: 1000 })
 
 describe('BeeClient', () => {
     describe('Testing the Lib <3', () => {
@@ -105,6 +105,13 @@ describe('BeeClient', () => {
             const res2 = await bee.getFeedAtIndex(wallet, 1)
             const string2 = td.decode(res2.chunk.data)
             assert.equal(string2, JSON.stringify(userObject2), 'userObject2 is not found')
+        })
+        step('reads a feed entry at specific new client', async (done) => {
+            const bee2 = new BeeClient("https://bee-gateway.duckdns.org", { timeout: 10000 })
+            const res = await bee.getFeedAtIndex(wallet, 0)
+            const string = td.decode(res.chunk.data)
+            assert.equal(string, JSON.stringify(userObject), 'userObject is not found')
+            done()
         })
         step('updates a feed at specific index', async (done) => {
             const res = await bee.updateFeedAtIndex(data3, wallet, 99)
@@ -178,6 +185,12 @@ describe('BeeClient', () => {
         })
         step('gets new greatest index +2', async (done) => {
             const res = await bee.get(wallet, 'testkey')
+            assert.equal(res, 'testvalue3', 'value is not found')
+            done()
+        })
+        step('gets new greatest index +2 with new context', async (done) => {
+            const bee2 = new BeeClient("https://bee-gateway.duckdns.org", { timeout: 1000 })
+            const res = await bee2.get(wallet, 'testkey')
             assert.equal(res, 'testvalue3', 'value is not found')
             done()
         })
