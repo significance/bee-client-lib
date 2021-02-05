@@ -99,6 +99,9 @@ const testId = new Uint8Array([
   244 ]);
 let testChunkPayload = new Uint8Array([1, 3, 3, 7]);
 let testChunkPayload2 = new Uint8Array([1, 3, 3, 3, 7]);
+let testChunkPayload3 = new Uint8Array([1, 3, 3, 3, 7]);
+let testChunkPayload4 = new Uint8Array([1, 3, 3, 3, 3, 7]);
+
 let testTopic = "testTopic" + Date.now();
 let privateKeyHex = "0xbb8f94a3dbca9cbac7c96f2580886e4bc83642b4ec8cc66a5510befe393cc069";
 let addressHex = "0x24264f871A3927dB877A1e8E32D7Ba0eEaa1d322";
@@ -137,7 +140,7 @@ describe('BeeClient', () => {
             done()
         })
 
-        step('sets greatest index', async (done) => {
+        step('sets greatest index 2', async (done) => {
             const res = await bee.set(addressHex, privateKeyHex, testTopic, testChunkPayload2)
             done()
         })
@@ -145,6 +148,31 @@ describe('BeeClient', () => {
         step('gets greatest index 2', async (done) => {
             let payload = await bee.get(addressHex, testTopic)
             assert.deepEqual(payload, testChunkPayload2)
+            done()
+        })
+
+        step('sets greatest index 3', async (done) => {
+            const res = await bee.set(addressHex, privateKeyHex, testTopic, testChunkPayload3)
+            done()
+        })
+
+        step('gets greatest index 3', async (done) => {
+            let payload = await bee.get(addressHex, testTopic)
+            assert.deepEqual(payload, testChunkPayload3)
+            done()
+        })
+
+        step('sets greatest index 4', async (done) => {
+            const res = await bee.set(addressHex, privateKeyHex, testTopic, testChunkPayload4)
+            done()
+        })
+
+        step('gets greatest index 4 with new context', async (done) => {
+            const bee2 = new BeeClient("https://bee-gateway.duckdns.org"
+                // , { timeout: 1000 }
+            )
+            let payload = await bee2.get(addressHex, testTopic)
+            assert.deepEqual(payload, testChunkPayload4)
             done()
         })
 

@@ -66,7 +66,6 @@ BeeClient.prototype.set = async function (address, privateKey, key, testChunkPay
     //if == -1, needs to search for highest index and add 1
     if(i === -1) {
         i = await this.getIndex(address, key, i)
-        i += 1
     }
 
     //if > -1 start at that index
@@ -109,20 +108,22 @@ BeeClient.prototype.get = async function (address, key, i = 0) {
 }
 
 BeeClient.prototype.getIndex = async function (address, key, i) {
-
+    // find the highest index
     let topicString = key
     let addressBytes = this.beeJS.butils.verifyBytes(20, this.beeJS.hutils.hexToBytes(address))
 
     let res = false
     let done = false
     while(done === false){
+        // if index is -1, skip this try
+        if(i == -1){
+            i = 0;
+        }
         try{
+            // try to get it at the expected highest index
             res = await this.getAtIndex(addressBytes, topicString, i)
             i += 1
         }catch(e){
-            if(i == -1){
-                return 0
-            }
             if(e.status === 404){
                 break
             }
