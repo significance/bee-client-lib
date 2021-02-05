@@ -98,7 +98,10 @@ const testId = new Uint8Array([
   39,
   244 ]);
 let testChunkPayload = new Uint8Array([1, 3, 3, 7]);
-let testTopic = "testTopic";
+let testChunkPayload2 = new Uint8Array([1, 3, 3, 3, 7]);
+let testTopic = "testTopic" + Date.now();
+let privateKeyHex = "0xbb8f94a3dbca9cbac7c96f2580886e4bc83642b4ec8cc66a5510befe393cc069";
+let addressHex = "0x24264f871A3927dB877A1e8E32D7Ba0eEaa1d322";
 
 describe('BeeClient', () => {
     describe('Testing the Lib <3', () => {
@@ -108,33 +111,67 @@ describe('BeeClient', () => {
         })
 
         step('sets at index', async (done) => {
-            let privateKey = bee.beeJS.butils.verifyBytes(32, bee.beeJS.hutils.hexToBytes('0xbb8f94a3dbca9cbac7c96f2580886e4bc83642b4ec8cc66a5510befe393cc069'))
-            let r = await bee.setAtIndex(privateKey, testTopic, 2, testChunkPayload)
+            let privateKey = bee.beeJS.butils.verifyBytes(32, bee.beeJS.hutils.hexToBytes(privateKeyHex))
+            let r = await bee.setAtIndex(privateKey, testTopic, 12334, testChunkPayload)
             assert.equal(r.code, 200)
             done()
         })
 
         step('gets at index', async (done) => {
-            let address = bee.beeJS.butils.verifyBytes(20, bee.beeJS.hutils.hexToBytes('0x24264f871A3927dB877A1e8E32D7Ba0eEaa1d322'))
-            let payload = await bee.getAtIndex(address, testTopic, 2)
+            let address = bee.beeJS.butils.verifyBytes(20, bee.beeJS.hutils.hexToBytes(addressHex))
+            let payload = await bee.getAtIndex(address, testTopic, 12334)
             console.log('c',payload, testChunkPayload)
             assert.deepEqual(payload, testChunkPayload)
             done()
         })
 
         step('sets', async (done) => {
-            let r = await bee.set('0xbb8f94a3dbca9cbac7c96f2580886e4bc83642b4ec8cc66a5510befe393cc069', testTopic, testChunkPayload, 0)
+            let r = await bee.set(addressHex, privateKeyHex, testTopic, testChunkPayload, 0)
             assert.equal(r, true)
             done()
         })
 
         step('gets', async (done) => {
-            let payload = bee.get('0x24264f871A3927dB877A1e8E32D7Ba0eEaa1d322', testTopic, 0).then(console.log)
-            // console.log('c',payload, testChunkPayload)
+            let payload = await bee.get(addressHex, testTopic, 0)
             assert.deepEqual(payload, testChunkPayload)
             done()
         })
 
+        step('sets greatest index', async (done) => {
+            const res = await bee.set(addressHex, privateKeyHex, testTopic, testChunkPayload2)
+            done()
+        })
+
+        step('gets greatest index 2', async (done) => {
+            let payload = await bee.get(addressHex, testTopic)
+            assert.deepEqual(payload, testChunkPayload2)
+            done()
+        })
+
+        // step('sets new greatest index +1', async (done) => {
+        //     const res = await bee.set(wallet, 'testkey', 'testvalue2')
+        //     done()
+        // })
+        // step('gets new greatest index +1', async (done) => {
+        //     const res = await bee.getByAddress(toHexString(wallet.address), 'testkey')
+        //     assert.equal(res, 'testvalue2', 'value is not found')
+        //     done()
+        // })
+        // step('sets new greatest index +2', async (done) => {
+        //     const res = await bee.set(wallet, 'testkey', 'testvalue3')
+        //     done()
+        // })
+        // step('gets new greatest index +2', async (done) => {
+        //     const res = await bee.get(wallet, 'testkey')
+        //     assert.equal(res, 'testvalue3', 'value is not found')
+        //     done()
+        // })
+        // step('gets new greatest index +2 with new context', async (done) => {
+        //     const bee2 = new BeeClient("https://bee-gateway.duckdns.org", { timeout: 1000 })
+        //     const res = await bee2.get(wallet, 'testkey')
+        //     assert.equal(res, 'testvalue3', 'value is not found')
+        //     done()
+        // })
 
         // step('stores item', async (done) => {
         //     fileData = await readFileAsync('test/helloworld.txt')

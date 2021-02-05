@@ -29,7 +29,7 @@ BeeClient.prototype.calculateId = function(topicString, i) {
 }
 
 BeeClient.prototype.setAtIndex = function(privateKeyBytes, topicString, i, testChunkPayload) {
-
+    console.log("set",topicString, i, testChunkPayload)
     let identifier = this.calculateId(topicString, i);
 
     let privateKey = this.beeJS.butils.verifyBytes(32, privateKeyBytes)
@@ -44,7 +44,7 @@ BeeClient.prototype.setAtIndex = function(privateKeyBytes, topicString, i, testC
 
 
 BeeClient.prototype.getAtIndex = async function(addressBytes, topicString, i) {
-    
+    console.log("get",topicString, i)
     let identifier = this.calculateId(topicString, i)
     let socReader = this.beeJS.makeSOCReader(addressBytes)
     let response
@@ -60,65 +60,77 @@ BeeClient.prototype.getAtIndex = async function(addressBytes, topicString, i) {
 
 
 
-BeeClient.prototype.set = async function (privateKey, key, testChunkPayload, i = -1) {
+BeeClient.prototype.set = async function (address, privateKey, key, testChunkPayload, i = -1) {
     //privateKey hex string to bytes
 
-    //if == -1, needs to search for highest index
+    //if == -1, needs to search for highest index and add 1
+    if(i === -1) {
+        i = await this.getIndex(address, key, i)
+        i += 1
+    }
+
     //if > -1 start at that index
-    
+
     let topicString = key
     let privateKeyBytes = this.beeJS.butils.verifyBytes(32, this.beeJS.hutils.hexToBytes(privateKey))
-    console.log(privateKeyBytes)
+
     let r = await this.setAtIndex(privateKeyBytes, topicString, i, testChunkPayload)
     return r.code == "200"
 }
 
 
 //address = '0x24264f871A3927dB877A1e8E32D7Ba0eEaa1d322';
-BeeClient.prototype.get = async function (address, key, i = -1) {
+BeeClient.prototype.get = async function (address, key, i = 0) {
 
     //if == -1, needs to search for highest index
     //if > -1 start at that index
 
-    //address hex string to bytes
-    console.log('test',address)
-
     let topicString = key
     let addressBytes = this.beeJS.butils.verifyBytes(20, this.beeJS.hutils.hexToBytes(address))
-    console.log('test',addressBytes)
+
     let res = false
     let done = false
     while(done === false){
         try{
-            console.log(addressBytes, topicString, i)
+            // if it exists, try the next one
             res = await this.getAtIndex(addressBytes, topicString, i)
-            console.log(res)
+            console.log("R",res)
             i += 1
         }catch(e){
+            console.log("E",e)
             if(e.status === 404){
                 break
             }
-            throw e
-            // switch(e){
-            //     // case 0 :
-            //     // case 404 :
-            //     // case 500 :
-            //     //     // a chunk either
-            //     //     // cannot be found or
-            //     //     // does not exist
-            //     //     // 500 is included as it seems 
-            //     //     // the incorrect error reported from bee
-            //     //     done = true;
-            //     //     //re-estabish dfeeds index
-            //     //     const indexedSaltedSocIdGen = this.feeds[salt][baddress]
-            //     //     indexedSaltedSocIdGen.set(i)
-            //     //     break
-            //     default:
-            //         throw e
-            // }       
+            throw e;     
         }
     }
+    console.log('x',res)
     return res
+}
+
+BeeClient.prototype.getIndex = async function (address, key, i) {
+
+    let topicString = key
+    let addressBytes = this.beeJS.butils.verifyBytes(20, this.beeJS.hutils.hexToBytes(address))
+
+    let res = false
+    let done = false
+    while(done === false){
+        try{
+            res = await this.getAtIndex(addressBytes, topicString, i)
+            i += 1
+        }catch(e){
+            if(i == -1){
+                return 0
+            }
+            if(e.status === 404){
+                break
+            }
+            throw e;     
+        }
+    }
+    console.log('x',res)
+    return i
 }
 
 
