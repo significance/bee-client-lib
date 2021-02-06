@@ -68,7 +68,7 @@ BeeClient.prototype.setB = async function (address, privateKey, key, testChunkPa
     let privateKeyBytes = this.beeJS.butils.verifyBytes(32, this.beeJS.hutils.hexToBytes(privateKey))
 
     let r = await this.setAtIndex(privateKeyBytes, topicString, i, testChunkPayload)
-    return r.code == "200"
+    return r.reference
 }
 
 BeeClient.prototype.set = async function (address, privateKey, key, testChunkPayload, i = -1) {

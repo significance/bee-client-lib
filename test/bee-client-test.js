@@ -60,7 +60,7 @@ const assert = require('chai').assert
 // const data2 = te.encode(JSON.stringify(userObject2))
 // const data3 = te.encode(JSON.stringify(userObject3))
 
-const bee = new BeeClient("https://bee-gateway.duckdns.org"
+const bee = new BeeClient("http://localhost:1633"
     // , { timeout: 1000 }
 )
 
@@ -101,8 +101,9 @@ let testChunkPayload = new Uint8Array([1, 3, 3, 7]);
 let testChunkPayload2 = new Uint8Array([1, 3, 3, 3, 7]);
 let testChunkPayload3 = new Uint8Array([1, 3, 3, 3, 7]);
 let testChunkPayload4 = new Uint8Array([1, 3, 3, 3, 3, 7]);
+let testChunkPayload5 = new Uint8Array([1, 3, 3, 3, 3, 3, 7]);
 
-let testHexChunkPayload5 = "1333337";
+let testHexChunkPayload5 = "13333337";
 
 
 let testTopic = "testTopic" + Date.now();
@@ -119,7 +120,7 @@ describe('BeeClient', () => {
         step('sets at index', async (done) => {
             let privateKey = bee.beeJS.butils.verifyBytes(32, bee.beeJS.hutils.hexToBytes(privateKeyHex))
             let r = await bee.setAtIndex(privateKey, testTopic, 12334, testChunkPayload)
-            assert.equal(r.code, 200)
+            assert.equal(r.reference.length, 64)
             done()
         })
 
@@ -131,55 +132,55 @@ describe('BeeClient', () => {
         })
 
         step('sets', async (done) => {
-            let r = await bee.setB(addressHex, privateKeyHex, testTopic, testChunkPayload, 0)
-            assert.equal(r, true)
+            let r = await bee.setB(addressHex, privateKeyHex, testTopic, testChunkPayload2, 0)
+            assert.equal(r.length, 64)
             done()
         })
 
         step('gets', async (done) => {
             let payload = await bee.getB(addressHex, testTopic, 0)
-            assert.deepEqual(payload, testChunkPayload)
+            assert.deepEqual(payload, testChunkPayload2)
             done()
         })
 
         step('sets greatest index 2', async (done) => {
-            const res = await bee.setB(addressHex, privateKeyHex, testTopic, testChunkPayload2)
+            const res = await bee.setB(addressHex, privateKeyHex, testTopic, testChunkPayload3)
             done()
         })
 
         step('gets greatest index 2', async (done) => {
             let payload = await bee.getB(addressHex, testTopic)
-            assert.deepEqual(payload, testChunkPayload2)
+            assert.deepEqual(payload, testChunkPayload3)
             done()
         })
 
         step('sets greatest index 3', async (done) => {
-            const res = await bee.setB(addressHex, privateKeyHex, testTopic, testChunkPayload3)
+            const res = await bee.setB(addressHex, privateKeyHex, testTopic, testChunkPayload4)
             done()
         })
 
         step('gets greatest index 3', async (done) => {
             let payload = await bee.getB(addressHex, testTopic)
-            assert.deepEqual(payload, testChunkPayload3)
-            done()
-        })
-
-        step('sets greatest index 4', async (done) => {
-            const res = await bee.setB(addressHex, privateKeyHex, testTopic, testChunkPayload4)
-            done()
-        })
-
-        step('gets greatest index 4 with new context', async (done) => {
-            const bee2 = new BeeClient("https://bee-gateway.duckdns.org"
-                // , { timeout: 1000 }
-            )
-            let payload = await bee2.getB(addressHex, testTopic)
             assert.deepEqual(payload, testChunkPayload4)
             done()
         })
 
+        step('sets greatest index 4', async (done) => {
+            const res = await bee.setB(addressHex, privateKeyHex, testTopic, testChunkPayload5)
+            done()
+        })
+
+        step('gets greatest index 4 with new context', async (done) => {
+            const bee2 = new BeeClient("http://localhost:1633"
+                // , { timeout: 1000 }
+            )
+            let payload = await bee2.getB(addressHex, testTopic)
+            assert.deepEqual(payload, testChunkPayload5)
+            done()
+        })
+
         step('sets hex greatest index 5 with new context', async (done) => {
-            const bee2 = new BeeClient("https://bee-gateway.duckdns.org"
+            const bee2 = new BeeClient("http://localhost:1633"
                 // , { timeout: 1000 }
             )
             const res = await bee2.set(addressHex, privateKeyHex, testTopic, testHexChunkPayload5)
@@ -187,168 +188,12 @@ describe('BeeClient', () => {
         })
 
         step('gets hex greatest index 5 with new context', async (done) => {
-            const bee3 = new BeeClient("https://bee-gateway.duckdns.org"
+            const bee3 = new BeeClient("http://localhost:1633"
                 // , { timeout: 1000 }
             )
             let payload = await bee3.get(addressHex, testTopic)
             assert.deepEqual(payload, testHexChunkPayload5)
             done()
         })
-
-        // step('sets new greatest index +1', async (done) => {
-        //     const res = await bee.set(wallet, 'testkey', 'testvalue2')
-        //     done()
-        // })
-        // step('gets new greatest index +1', async (done) => {
-        //     const res = await bee.getByAddress(toHexString(wallet.address), 'testkey')
-        //     assert.equal(res, 'testvalue2', 'value is not found')
-        //     done()
-        // })
-        // step('sets new greatest index +2', async (done) => {
-        //     const res = await bee.set(wallet, 'testkey', 'testvalue3')
-        //     done()
-        // })
-        // step('gets new greatest index +2', async (done) => {
-        //     const res = await bee.get(wallet, 'testkey')
-        //     assert.equal(res, 'testvalue3', 'value is not found')
-        //     done()
-        // })
-        // step('gets new greatest index +2 with new context', async (done) => {
-        //     const bee2 = new BeeClient("https://bee-gateway.duckdns.org", { timeout: 1000 })
-        //     const res = await bee2.get(wallet, 'testkey')
-        //     assert.equal(res, 'testvalue3', 'value is not found')
-        //     done()
-        // })
-
-        // step('stores item', async (done) => {
-        //     fileData = await readFileAsync('test/helloworld.txt')
-        //     const hash = await bee.uploadData(fileData).then(hash => {
-        //         tempHash = toHex(hash)
-        //     })
-        //     done()
-        //     //no assertion?
-        // })
-        // step('retrieves item', async (done) => {
-        //     const newHash = tempHash.startsWith('0x') ? tempHash.slice(2) : tempHash
-        //     const res = await bee.downloadData(newHash)
-        //     const result = Buffer.from(res)
-        //     assert.equal(result.toString(), fileData.toString(), "Stored is not the same as retrieved")
-        //     done()
-        // })
-        // step('creates a feed', async (done) => {
-        //     const res = await bee.addFeed(wallet)
-        //     const res2 = await bee.updateFeed(data, wallet)
-        //     done()
-        // })
-        // step('reads a feed', async (done) => {
-        //     const res = await bee.getFeed(wallet)
-        //     const string = td.decode(res.chunk.data)
-        //     assert.equal(string, JSON.stringify(userObject), 'userObject is not found')
-        //     done()
-        // })
-        // step('updates a feed', async (done) => {
-        //     const res = await bee.updateFeed(data2, wallet)
-        //     const res2 = await bee.getFeed(wallet)
-        //     const string = td.decode(res2.chunk.data)
-        //     assert.equal(string, JSON.stringify(userObject2), 'userObject2 is not found')
-        //     done()
-        // })
-        // step('reads a feed entry at specific index', async () => {
-        //     const res = await bee.getFeedAtIndex(wallet, 0)
-        //     const string = td.decode(res.chunk.data)
-        //     assert.equal(string, JSON.stringify(userObject), 'userObject is not found')
-
-        //     const res2 = await bee.getFeedAtIndex(wallet, 1)
-        //     const string2 = td.decode(res2.chunk.data)
-        //     assert.equal(string2, JSON.stringify(userObject2), 'userObject2 is not found')
-        // })
-        // step('reads a feed entry at specific new client', async (done) => {
-        //     const bee2 = new BeeClient("https://bee-gateway.duckdns.org", { timeout: 10000 })
-        //     const res = await bee.getFeedAtIndex(wallet, 0)
-        //     const string = td.decode(res.chunk.data)
-        //     assert.equal(string, JSON.stringify(userObject), 'userObject is not found')
-        //     done()
-        // })
-        // step('updates a feed at specific index', async (done) => {
-        //     const res = await bee.updateFeedAtIndex(data3, wallet, 99)
-        //     const res2 = await bee.getFeedAtIndex(wallet, 99)
-        //     const string = td.decode(res2.chunk.data)
-        //     assert.equal(string, JSON.stringify(userObject3), 'userObject3 is not found')
-        //     done()
-        // })
-        // step('creates a feed w salt', async (done) => {
-        //     const res = await bee.addFeedWithSalt(salt, wallet)
-        //     const res2 = await bee.updateFeedWithSalt(salt, data, wallet)
-        //     done()
-        // })
-        // step('reads a feed w salt', async (done) => {
-        //     const res = await bee.getFeedWithSalt(salt, wallet)
-        //     var string = td.decode(res.chunk.data);
-        //     assert.equal(string, JSON.stringify(userObject), 'userObject is not found')
-        //     done()
-        // })
-        // step('updates a feed w salt', async (done) => {
-        //     const res = await bee.updateFeedWithSalt(salt, data2, wallet)
-        //     const res2 = await bee.getFeedWithSalt(salt, wallet)
-        //     var string = td.decode(res2.chunk.data);
-        //     assert.equal(string, JSON.stringify(userObject2), 'userObject2 is not found')
-        //     done()
-        // })
-        // step('reads a feed w salt at specific index', async (done) => {
-        //     const res = await bee.getFeedWithSaltAtIndex(salt, wallet, 0)
-        //     const string = td.decode(res.chunk.data)
-        //     assert.equal(string, JSON.stringify(userObject), 'userObject is not found')
-
-        //     const res2 = await bee.getFeedWithSaltAtIndex(salt, wallet, 1)
-        //     const string2 = td.decode(res2.chunk.data)
-        //     assert.equal(string2, JSON.stringify(userObject2), 'userObject2 is not found')
-        //     done()
-        // })
-        // step('updates a feed w salt at specific index', async (done) => {
-        //     const res = await bee.updateFeedWithSaltAtIndex(salt2, data, wallet, 999)
-        //     const res2 = await bee.getFeedWithSaltAtIndex(salt, wallet, 999)
-        //     var string = td.decode(res2.chunk.data);
-        //     assert.equal(string, JSON.stringify(userObject), 'userObject is not found')
-        //     done()
-        // })
-        // step('reads a feed w salt at highest available index', async (done) => {
-        //     const res = await bee.getFeedWithSaltAtHighestIndex(salt, wallet, 0)
-        //     const string = td.decode(res.chunk.data)
-        //     assert.equal(string, JSON.stringify(userObject2), 'userObject is not found')
-        //     done()
-        // })
-        // step('sets greatest index', async (done) => {
-        //     const res = await bee.set(wallet, 'testkey', 'testvalue')
-        //     done()
-        // })
-        // step('gets greatest index', async (done) => {
-        //     const res = await bee.get(wallet, 'testkey')
-        //     assert.equal(res, 'testvalue', 'value is not found')
-        //     done()
-        // })
-        // step('sets new greatest index +1', async (done) => {
-        //     const res = await bee.set(wallet, 'testkey', 'testvalue2')
-        //     done()
-        // })
-        // step('gets new greatest index +1', async (done) => {
-        //     const res = await bee.getByAddress(toHexString(wallet.address), 'testkey')
-        //     assert.equal(res, 'testvalue2', 'value is not found')
-        //     done()
-        // })
-        // step('sets new greatest index +2', async (done) => {
-        //     const res = await bee.set(wallet, 'testkey', 'testvalue3')
-        //     done()
-        // })
-        // step('gets new greatest index +2', async (done) => {
-        //     const res = await bee.get(wallet, 'testkey')
-        //     assert.equal(res, 'testvalue3', 'value is not found')
-        //     done()
-        // })
-        // step('gets new greatest index +2 with new context', async (done) => {
-        //     const bee2 = new BeeClient("https://bee-gateway.duckdns.org", { timeout: 1000 })
-        //     const res = await bee2.get(wallet, 'testkey')
-        //     assert.equal(res, 'testvalue3', 'value is not found')
-        //     done()
-        // })
     })
 })
