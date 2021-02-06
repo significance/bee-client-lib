@@ -14,7 +14,7 @@
     "base32-encode": "^1.1.1",
     "chai": "^4.2.0",
     "chai-spies": "^1.0.0",
-    "@ethersphere/bee-js": "git+https://github.com/significance/bee-js#926881fe61019dc19f97ff8213894d093b8a0f36",
+    "@ethersphere/bee-js": "git+https://github.com/significance/bee-js#5ea0b2454e7b6311bc6ffbaa8f1aff19fe57b5ec",
     "mocha": "^8.2.1",
     "node-fetch": "^2.6.1",
     "text-encoding": "^0.7.0",
