@@ -60,7 +60,7 @@ BeeClient.prototype.getAtIndex = async function(addressBytes, topicString, i) {
 
 
 
-BeeClient.prototype.set = async function (address, privateKey, key, testChunkPayload, i = -1) {
+BeeClient.prototype.setB = async function (address, privateKey, key, testChunkPayload, i = -1) {
     //privateKey hex string to bytes
 
     //if == -1, needs to search for highest index and add 1
@@ -77,9 +77,16 @@ BeeClient.prototype.set = async function (address, privateKey, key, testChunkPay
     return r.code == "200"
 }
 
+BeeClient.prototype.set = async function (address, privateKey, key, testChunkPayload, i = -1) {
+    console.log(testChunkPayload)
+    let b = this.beeJS.hutils.hexToBytes(testChunkPayload);
+    console.log('gb',b)
+    return this.setB(address, privateKey, key, b, i)
+}
+
 
 //address = '0x24264f871A3927dB877A1e8E32D7Ba0eEaa1d322';
-BeeClient.prototype.get = async function (address, key, i = 0) {
+BeeClient.prototype.getB = async function (address, key, i = 0) {
 
     //if == -1, needs to search for highest index
     //if > -1 start at that index
@@ -105,6 +112,12 @@ BeeClient.prototype.get = async function (address, key, i = 0) {
     }
     console.log('x',res)
     return res
+}
+
+BeeClient.prototype.get = async function (address, key, i = 0) {
+    let b = await this.getB(address, key, i)
+    console.log('gb',b)
+    return this.beeJS.hutils.bytesToHex(b)
 }
 
 BeeClient.prototype.getIndex = async function (address, key, i) {
