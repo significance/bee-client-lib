@@ -29,29 +29,23 @@ BeeClient.prototype.calculateId = function(topicString, i) {
 }
 
 BeeClient.prototype.setAtIndex = function(privateKeyBytes, topicString, i, testChunkPayload) {
-    console.log("set",topicString, i, testChunkPayload)
     let identifier = this.calculateId(topicString, i);
 
     let privateKey = this.beeJS.butils.verifyBytes(32, privateKeyBytes)
     let signer = this.beeJS.makeDefaultSigner(privateKey)
-    // console.log(signer)
     let socWriter = this.beeJS.makeSOCWriter(signer)
-    // console.log(socWriter)
-    // console.log(identifier, testChunkPayload)
+
     return socWriter.upload(this.beeJS.butils.verifyBytes(32,identifier), testChunkPayload)
-    // return socWriter.upload(this.beeJS.butils.verifyBytes(32,identifier), testChunkPayload).then(console.log)
 }
 
 
 BeeClient.prototype.getAtIndex = async function(addressBytes, topicString, i) {
-    console.log("get",topicString, i)
     let identifier = this.calculateId(topicString, i)
     let socReader = this.beeJS.makeSOCReader(addressBytes)
     let response
     try {
         response = await socReader.download(identifier)
     }catch(e){
-        console.log('bc',e.status == 404)
         throw e
     }
 
@@ -78,9 +72,7 @@ BeeClient.prototype.setB = async function (address, privateKey, key, testChunkPa
 }
 
 BeeClient.prototype.set = async function (address, privateKey, key, testChunkPayload, i = -1) {
-    console.log(testChunkPayload)
     let b = this.beeJS.hutils.hexToBytes(testChunkPayload);
-    console.log('gb',b)
     return this.setB(address, privateKey, key, b, i)
 }
 
@@ -100,23 +92,19 @@ BeeClient.prototype.getB = async function (address, key, i = 0) {
         try{
             // if it exists, try the next one
             res = await this.getAtIndex(addressBytes, topicString, i)
-            console.log("R",res)
             i += 1
         }catch(e){
-            console.log("E",e)
             if(e.status === 404){
                 break
             }
             throw e;     
         }
     }
-    console.log('x',res)
     return res
 }
 
 BeeClient.prototype.get = async function (address, key, i = 0) {
     let b = await this.getB(address, key, i)
-    console.log('gb',b)
     return this.beeJS.hutils.bytesToHex(b)
 }
 
@@ -143,7 +131,6 @@ BeeClient.prototype.getIndex = async function (address, key, i) {
             throw e;     
         }
     }
-    console.log('x',res)
     return i
 }
 

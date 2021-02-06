@@ -126,7 +126,6 @@ describe('BeeClient', () => {
         step('gets at index', async (done) => {
             let address = bee.beeJS.butils.verifyBytes(20, bee.beeJS.hutils.hexToBytes(addressHex))
             let payload = await bee.getAtIndex(address, testTopic, 12334)
-            console.log('c',payload, testChunkPayload)
             assert.deepEqual(payload, testChunkPayload)
             done()
         })
@@ -192,7 +191,6 @@ describe('BeeClient', () => {
                 // , { timeout: 1000 }
             )
             let payload = await bee3.get(addressHex, testTopic)
-            console.log('u',payload, testHexChunkPayload5)
             assert.deepEqual(payload, testHexChunkPayload5)
             done()
         })
